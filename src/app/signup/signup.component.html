@@ -1,24 +1,17 @@
-<div class="container">
-  <h2>Cadastro de Usuário</h2>
-  <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="username">Usuário:</label>
-      <input type="text" class="form-control" formControlName="username" id="username">
-    </div>
-    <div class="form-group">
-      <label for="password">Senha:</label>
-      <input type="password" class="form-control" formControlName="password" id="password">
-    </div>
-    <div class="form-group">
-      <label for="email">E-mail:</label>
-      <input type="email" class="form-control" formControlName="email" id="email">
-    </div>
-    <div class="form-group">
-      <label for="fullName">Nome Completo:</label>
-      <input type="text" class="form-control" formControlName="fullName" id="fullName">
-    </div>
-    <button type="submit" class="btn btn-primary" [disabled]="loading">Cadastrar</button>
-  </form>
+<form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+  <div class="form-group">
+    <label for="name">Nome</label>
+    <input type="text" formControlName="name" class="form-control" id="name">
+  </div>
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input type="email" formControlName="email" class="form-control" id="email">
+  </div>
+  <div class="form-group">
+    <label for="password">Senha</label>
+    <input type="password" formControlName="password" class="form-control" id="password">
+  </div>
+  <button type="submit" class="btn btn-primary" [disabled]="loading">Cadastrar</button>
   <p *ngIf="loading">Carregando...</p>
   <p *ngIf="error" class="text-danger">{{ error }}</p>
-</div>
+</form>

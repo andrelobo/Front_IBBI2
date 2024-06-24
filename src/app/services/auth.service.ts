@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -11,7 +11,15 @@ export class AuthService {
   private apiUrl: string = environment.apiUrl;
 
   constructor(private http: HttpClient) {
-    this.userSubject = new BehaviorSubject<any>(null);
+    const storedUser = localStorage.getItem('user');
+    let parsedUser = null;
+    try {
+      parsedUser = storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error('Error parsing stored user data', error);
+      localStorage.removeItem('user');
+    }
+    this.userSubject = new BehaviorSubject<any>(parsedUser);
     this.user = this.userSubject.asObservable();
   }
 
@@ -22,28 +30,42 @@ export class AuthService {
   login(email: string, password: string): Observable<any> {
     const url = `${this.apiUrl}/token`;
     return this.http.post<any>(url, { email, password }).pipe(
-      map((response: any) => {
-        const user = response.user; // Ajuste conforme a estrutura da resposta da API
+      map(user => {
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('token', user.token);
         this.userSubject.next(user);
         return user;
-      })
+      }),
+      catchError(this.handleError)
     );
   }
 
-  register(userData: any): Observable<any> {
-    const url = `${this.apiUrl}/signup`; // Ajuste conforme a rota de registro da sua API
-    return this.http.post<any>(url, userData);
+  register(data: any): Observable<any> {
+    const url = `${this.apiUrl}/register`;
+    return this.http.post<any>(url, data).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  logout() {
+  logout(): void {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     this.userSubject.next(null);
   }
 
   getToken(): string | null {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  return user.token ?? null;
-}
+    return localStorage.getItem('token');
+  }
 
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'An unknown error occurred!';
+    if (error.error instanceof ErrorEvent) {
+      // A client-side or network error occurred.
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // The backend returned an unsuccessful response code.
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+    return throwError(() => new Error(errorMessage));
+  }
 }

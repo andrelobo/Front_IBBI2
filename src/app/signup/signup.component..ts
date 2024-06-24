@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-signup',
@@ -9,48 +9,41 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./signup.component.css']
 })
 export class SignupComponent implements OnInit {
-  signupForm!: FormGroup;
-  loading = false;
-  submitted = false;
+  signupForm: FormGroup;
   error: string | null = null;
+  loading: boolean = false;
 
   constructor(
     private formBuilder: FormBuilder,
-    private router: Router,
-    private authService: AuthService
-  ) {}
-
-  ngOnInit(): void {
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.signupForm = this.formBuilder.group({
-      username: ['', Validators.required],
+      name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', Validators.required]
     });
   }
 
-  // Método conveniente para fácil acesso aos campos do formulário
-  get f() {
-    return this.signupForm.controls;
-  }
+  ngOnInit(): void {}
 
-  onSubmit() {
-    this.submitted = true;
-
-    // Parar aqui se o formulário for inválido
+  onSubmit(): void {
     if (this.signupForm.invalid) {
       return;
     }
 
     this.loading = true;
-    this.authService.register(this.signupForm.value)
-      .subscribe(
-        (response) => {
-          this.router.navigate(['/login']);
-        },
-        (error) => {
-          this.error = error.message; // Defina a mensagem de erro conforme a necessidade da sua API
-          this.loading = false;
-        }
-      );
+    this.authService.register(this.signupForm.value).subscribe(
+      (response: any) => {
+        console.log('Usuário registrado com sucesso:', response);
+        this.router.navigate(['/login']);
+        this.loading = false;
+      },
+      (error: any) => {
+        this.error = `Erro ao registrar: ${error}`;
+        console.error(this.error);
+        this.loading = false;
+      }
+    );
   }
 }

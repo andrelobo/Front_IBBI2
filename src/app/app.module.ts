@@ -21,7 +21,7 @@ import { DividerModule } from 'primeng/divider';
 const routes: Routes = [
   { path: 'login', component: SigninComponent },
   { path: 'pages/home', component: HomeComponent },
-  { path: '', redirectTo: '/token', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
       { path: 'signup', component: SignupComponent },
       { path: 'categories', component: CategoriesComponent }
 ];
